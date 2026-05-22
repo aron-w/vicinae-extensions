@@ -141,7 +141,7 @@ function hdrToggleResult(state: DisplayState): SettingResult | undefined {
   }
 
   const nextState = state.hdrState ? "Disable" : "Enable";
-  const nextValue = state.hdrState ? "off" : "on";
+  const nextValue = state.hdrState ? "disable" : "enable";
   const command = ["kscreen-doctor", `output.${state.outputId}.hdr.${nextValue}`];
 
   return {
