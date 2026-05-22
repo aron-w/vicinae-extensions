@@ -14,6 +14,19 @@ interface DisplayState {
 const HDR_UNAVAILABLE_PATTERN = /\b(unsupported|unavailable|incapable|not\s+supported)\b/;
 const HDR_ENABLED_PATTERN = /\b(enabled|on|true|yes)\b/;
 const HDR_DISABLED_PATTERN = /\b(disabled|off|false|no)\b/;
+const ANSI_ESCAPE_PATTERN = new RegExp(String.raw`\u001B\[[0-?]*[ -/]*[@-~]`, "g");
+const OUTPUT_UUID_PATTERN = /\s+[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function stripAnsi(value: string): string {
+  return value.replace(ANSI_ESCAPE_PATTERN, "");
+}
+
+function parseDisplayName(value: string): string {
+  return value
+    .replace(/\s+\(.*\)$/, "")
+    .replace(OUTPUT_UUID_PATTERN, "")
+    .trim();
+}
 
 function parseHdrState(line: string): Pick<DisplayState, "hdrAvailable" | "hdrState"> | undefined {
   const lowerLine = line.toLowerCase();
@@ -48,7 +61,7 @@ function parseHdrState(line: string): Pick<DisplayState, "hdrAvailable" | "hdrSt
 }
 
 function parseDisplayStates(output: string): DisplayState[] {
-  const lines = output.split(/\r?\n/);
+  const lines = stripAnsi(output).split(/\r?\n/);
   const states: DisplayState[] = [];
   let currentState: DisplayState | undefined;
 
@@ -58,7 +71,7 @@ function parseDisplayStates(output: string): DisplayState[] {
     if (outputMatch) {
       currentState = {
         outputId: outputMatch[1],
-        name: outputMatch[2].replace(/\s+\(.*\)$/, "").trim(),
+        name: parseDisplayName(outputMatch[2]),
         hdrAvailable: false
       };
       states.push(currentState);
@@ -127,7 +140,7 @@ function hdrToggleResult(state: DisplayState): SettingResult | undefined {
     return undefined;
   }
 
-  const nextState = state.hdrState ? "disable" : "enable";
+  const nextState = state.hdrState ? "Disable" : "Enable";
   const nextValue = state.hdrState ? "off" : "on";
   const command = ["kscreen-doctor", `output.${state.outputId}.hdr.${nextValue}`];
 
@@ -135,7 +148,7 @@ function hdrToggleResult(state: DisplayState): SettingResult | undefined {
     id: `display:${state.outputId}:hdr`,
     type: "toggle",
     title: "HDR",
-    subtitle: `Turn ${nextState} HDR for ${state.name}`,
+    subtitle: `${nextState} HDR for ${state.name}`,
     accessory: state.hdrState ? "On" : "Off",
     icon: Icon.Monitor,
     keywords: [
