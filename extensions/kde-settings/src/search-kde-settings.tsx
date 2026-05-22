@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { DisplayAdapter } from "./adapters/display-adapter.js";
 import { KcmModuleAdapter } from "./adapters/kcm-module-adapter.js";
-import { runCommand } from "./lib/command.js";
+import { launchCommand, runCommand } from "./lib/command.js";
 import { sortResults } from "./lib/search.js";
 import type { SettingAction, SettingResult, SettingsAdapter } from "./types.js";
 
@@ -72,7 +72,12 @@ async function executeAction(action: SettingAction): Promise<void> {
   });
 
   try {
-    await runCommand(action.command, 10000);
+    if (action.kind === "open") {
+      await launchCommand(action.command);
+    } else {
+      await runCommand(action.command, 10000);
+    }
+
     await showToast({
       style: Toast.Style.Success,
       title: action.title

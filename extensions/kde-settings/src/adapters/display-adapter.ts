@@ -78,7 +78,7 @@ function displayModuleResult(): SettingResult {
         command: ["systemsettings", "kcm_kscreen"]
       },
       {
-        kind: "command",
+        kind: "open",
         title: "Open Displays & Monitor with kcmshell6",
         command: ["kcmshell6", "kcm_kscreen"]
       },

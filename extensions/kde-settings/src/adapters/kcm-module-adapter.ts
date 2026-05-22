@@ -134,7 +134,7 @@ function entryToResult(entry: DesktopEntry): SettingResult {
         command: openCommand
       },
       {
-        kind: "command",
+        kind: "open",
         title: `Open ${entry.name} with kcmshell6`,
         command: fallbackOpenCommand
       },
