@@ -1,0 +1,33 @@
+{
+  "name": "kde-settings",
+  "title": "KDE Settings",
+  "description": "Search and change KDE settings from Vicinae",
+  "version": "0.1.0",
+  "author": "Aron",
+  "icon": "gear",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-kde-settings",
+      "title": "KDE Settings",
+      "description": "Search and change KDE settings from Vicinae",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "vici build",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vicinae/api": "^0.8.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.0"
+  }
+}
