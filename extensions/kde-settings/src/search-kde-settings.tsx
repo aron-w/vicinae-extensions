@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { DisplayAdapter } from "./adapters/display-adapter.js";
 import { KcmModuleAdapter } from "./adapters/kcm-module-adapter.js";
+import { NetworkAdapter } from "./adapters/network-adapter.js";
 import { launchCommand, runCommand } from "./lib/command.js";
 import { sortResults } from "./lib/search.js";
 import type { SettingAction, SettingResult, SettingsAdapter } from "./types.js";
@@ -14,6 +15,7 @@ function useSettingsSearch(query: string): {
 } {
   const adapters = useMemo<SettingsAdapter[]>(() => [
     new DisplayAdapter(),
+    new NetworkAdapter(),
     new KcmModuleAdapter()
   ], []);
   const [isLoading, setIsLoading] = useState(true);

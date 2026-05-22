@@ -53,6 +53,7 @@ Keep the scope intentionally practical. Do not try to build a generic KDE settin
 ## Progress Log
 
 - 2026-05-22: Added the roadmap and began phase 1. HDR parsing now distinguishes unsupported HDR lines from enabled/disabled state lines, and successful non-open actions trigger a search refresh so toggle accessories can update.
+- 2026-05-22: Began phase 2 with a NetworkManager-backed Wi-Fi toggle. The adapter uses `nmcli radio wifi`, only exposes toggle actions for known enabled/disabled states, and falls back to opening KDE network settings when state is unavailable. Local probe returned `enabled`.
 
 ## Important Findings
 
