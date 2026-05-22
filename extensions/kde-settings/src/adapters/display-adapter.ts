@@ -145,14 +145,14 @@ function hdrToggleResult(state: DisplayState): SettingResult | undefined {
   const command = [
     "kscreen-doctor",
     `output.${state.outputId}.hdr.${nextValue}`,
-    ...(state.hdrState ? [`output.${state.outputId}.brightness.100`] : [])
+    `output.${state.outputId}.wcg.${nextValue}`
   ];
 
   return {
     id: `display:${state.outputId}:hdr`,
     type: "toggle",
     title: "HDR",
-    subtitle: state.hdrState ? `Disable HDR for ${state.name} and restore SDR brightness` : `${nextState} HDR for ${state.name}`,
+    subtitle: `${nextState} HDR and wide color gamut for ${state.name}`,
     accessory: state.hdrState ? "On" : "Off",
     icon: Icon.Monitor,
     keywords: [

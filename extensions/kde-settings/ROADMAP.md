@@ -57,6 +57,7 @@ Keep the scope intentionally practical. Do not try to build a generic KDE settin
 - 2026-05-22: Fixed HDR detection for colored `kscreen-doctor -o` output. KScreen emits ANSI escape codes in this environment, which prevented `Output:` and `HDR:` lines from matching. The display adapter now strips ANSI codes and removes output UUIDs from display names.
 - 2026-05-22: Fixed HDR toggle command syntax. This KScreen version documents `output.<name>.hdr.enable` and `output.<name>.hdr.disable`, not `hdr.on` and `hdr.off`.
 - 2026-05-22: Fixed HDR off cleanup for DP-2. KScreen disables HDR but leaves non-HDR brightness at 50%; adding `output.<id>.brightness.100` to the disable command restored the expected SDR appearance.
+- 2026-05-22: Matched KDE's HDR checkbox more closely. Upstream KScreen maps the HDR checkbox to both `setHdrEnabled()` and `setWcgEnabled()`, so the command path now toggles `hdr` and `wcg` together and removes the brightness workaround.
 
 ## Important Findings
 
