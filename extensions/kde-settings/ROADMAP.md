@@ -56,6 +56,7 @@ Keep the scope intentionally practical. Do not try to build a generic KDE settin
 - 2026-05-22: Began phase 2 with a NetworkManager-backed Wi-Fi toggle. The adapter uses `nmcli radio wifi`, only exposes toggle actions for known enabled/disabled states, and falls back to opening KDE network settings when state is unavailable. Local probe returned `enabled`.
 - 2026-05-22: Fixed HDR detection for colored `kscreen-doctor -o` output. KScreen emits ANSI escape codes in this environment, which prevented `Output:` and `HDR:` lines from matching. The display adapter now strips ANSI codes and removes output UUIDs from display names.
 - 2026-05-22: Fixed HDR toggle command syntax. This KScreen version documents `output.<name>.hdr.enable` and `output.<name>.hdr.disable`, not `hdr.on` and `hdr.off`.
+- 2026-05-22: Fixed HDR off cleanup for DP-2. KScreen disables HDR but leaves non-HDR brightness at 50%; adding `output.<id>.brightness.100` to the disable command restored the expected SDR appearance.
 
 ## Important Findings
 
