@@ -9,6 +9,7 @@ import type { SettingAction, SettingResult, SettingsAdapter } from "./types.js";
 
 function useSettingsSearch(query: string): {
   isLoading: boolean;
+  refresh: () => void;
   results: SettingResult[];
 } {
   const adapters = useMemo<SettingsAdapter[]>(() => [
@@ -16,6 +17,7 @@ function useSettingsSearch(query: string): {
     new KcmModuleAdapter()
   ], []);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshRevision, setRefreshRevision] = useState(0);
   const [results, setResults] = useState<SettingResult[]>([]);
 
   useEffect(() => {
@@ -53,17 +55,20 @@ function useSettingsSearch(query: string): {
     return () => {
       isCancelled = true;
     };
-  }, [adapters, query]);
+  }, [adapters, query, refreshRevision]);
 
   return {
     isLoading,
+    refresh: () => {
+      setRefreshRevision((revision) => revision + 1);
+    },
     results
   };
 }
 
-async function executeAction(action: SettingAction): Promise<void> {
+async function executeAction(action: SettingAction): Promise<boolean> {
   if (action.command === undefined) {
-    return;
+    return false;
   }
 
   await showToast({
@@ -82,6 +87,7 @@ async function executeAction(action: SettingAction): Promise<void> {
       style: Toast.Style.Success,
       title: action.title
     });
+    return true;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await showToast({
@@ -89,6 +95,7 @@ async function executeAction(action: SettingAction): Promise<void> {
       title: "Command failed",
       message
     });
+    return false;
   }
 }
 
@@ -105,7 +112,7 @@ function iconForAction(action: SettingAction): Icon {
   }
 }
 
-function ResultActions({ result }: { result: SettingResult }): JSX.Element {
+function ResultActions({ onRefresh, result }: { onRefresh: () => void; result: SettingResult }): JSX.Element {
   return (
     <ActionPanel>
       {result.actions.map((action) => {
@@ -126,7 +133,11 @@ function ResultActions({ result }: { result: SettingResult }): JSX.Element {
             title={action.title}
             icon={iconForAction(action)}
             onAction={() => {
-              void executeAction(action);
+              void executeAction(action).then((succeeded) => {
+                if (succeeded && action.kind !== "open") {
+                  onRefresh();
+                }
+              });
             }}
           />
         );
@@ -137,7 +148,7 @@ function ResultActions({ result }: { result: SettingResult }): JSX.Element {
 
 export default function SearchKdeSettings(): JSX.Element {
   const [query, setQuery] = useState("");
-  const { isLoading, results } = useSettingsSearch(query);
+  const { isLoading, refresh, results } = useSettingsSearch(query);
 
   return (
     <List
@@ -157,7 +168,7 @@ export default function SearchKdeSettings(): JSX.Element {
             }
           ]}
           keywords={result.keywords}
-          actions={<ResultActions result={result} />}
+          actions={<ResultActions onRefresh={refresh} result={result} />}
         />
       ))}
     </List>

@@ -50,6 +50,10 @@ Keep the scope intentionally practical. Do not try to build a generic KDE settin
    - SDR brightness.
    - Default audio device or mute toggles, if reliable command or D-Bus interfaces are identified.
 
+## Progress Log
+
+- 2026-05-22: Added the roadmap and began phase 1. HDR parsing now distinguishes unsupported HDR lines from enabled/disabled state lines, and successful non-open actions trigger a search refresh so toggle accessories can update.
+
 ## Important Findings
 
 - HDR is the best first editable display feature because KScreen exposes it through `kscreen-doctor`.

@@ -11,6 +11,42 @@ interface DisplayState {
   hdrAvailable: boolean;
 }
 
+const HDR_UNAVAILABLE_PATTERN = /\b(unsupported|unavailable|incapable|not\s+supported)\b/;
+const HDR_ENABLED_PATTERN = /\b(enabled|on|true|yes)\b/;
+const HDR_DISABLED_PATTERN = /\b(disabled|off|false|no)\b/;
+
+function parseHdrState(line: string): Pick<DisplayState, "hdrAvailable" | "hdrState"> | undefined {
+  const lowerLine = line.toLowerCase();
+
+  if (!/\b(hdr|high dynamic range)\b/.test(lowerLine)) {
+    return undefined;
+  }
+
+  if (HDR_UNAVAILABLE_PATTERN.test(lowerLine)) {
+    return {
+      hdrAvailable: false
+    };
+  }
+
+  if (HDR_ENABLED_PATTERN.test(lowerLine)) {
+    return {
+      hdrAvailable: true,
+      hdrState: true
+    };
+  }
+
+  if (HDR_DISABLED_PATTERN.test(lowerLine)) {
+    return {
+      hdrAvailable: true,
+      hdrState: false
+    };
+  }
+
+  return {
+    hdrAvailable: true
+  };
+}
+
 function parseDisplayStates(output: string): DisplayState[] {
   const lines = output.split(/\r?\n/);
   const states: DisplayState[] = [];
@@ -33,16 +69,11 @@ function parseDisplayStates(output: string): DisplayState[] {
       continue;
     }
 
-    const lowerLine = line.toLowerCase();
+    const hdrState = parseHdrState(line);
 
-    if (/\bhdr\b/.test(lowerLine)) {
-      currentState.hdrAvailable = true;
-
-      if (/\b(enabled|on|true|yes)\b/.test(lowerLine)) {
-        currentState.hdrState = true;
-      } else if (/\b(disabled|off|false|no)\b/.test(lowerLine)) {
-        currentState.hdrState = false;
-      }
+    if (hdrState !== undefined) {
+      currentState.hdrAvailable = hdrState.hdrAvailable;
+      currentState.hdrState = hdrState.hdrState;
     }
   }
 
