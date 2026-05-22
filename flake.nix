@@ -12,8 +12,51 @@
       ];
 
       forAllSystems = nixpkgs.lib.genAttrs systems;
+
+      extensionNames = [
+        "kde-settings"
+      ];
+
+      mkVicinaeExtension =
+        pkgs: name:
+        let
+          src = pkgs.lib.cleanSourceWith {
+            src = ./extensions + "/${name}";
+            filter =
+              path: type:
+              let
+                base = baseNameOf path;
+              in
+              !(
+                type == "directory"
+                && builtins.elem base [
+                  "node_modules"
+                  "dist"
+                ]
+              );
+          };
+        in
+        pkgs.buildNpmPackage {
+          inherit name src;
+
+          inherit (pkgs.importNpmLock) npmConfigHook;
+          npmDeps = pkgs.importNpmLock { npmRoot = src; };
+
+          installPhase = ''
+            runHook preInstall
+
+            mkdir -p "$out"
+            cp -r /build/.local/share/vicinae/extensions/${name}/* "$out/"
+
+            runHook postInstall
+          '';
+        };
     in
     {
+      lib = {
+        inherit extensionNames mkVicinaeExtension;
+      };
+
       devShells = forAllSystems (
         system:
         let
@@ -42,46 +85,26 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          kdeSettingsSrc = pkgs.lib.cleanSourceWith {
-            src = ./extensions/kde-settings;
-            filter =
-              path: type:
-              let
-                name = baseNameOf path;
-              in
-              !(
-                type == "directory"
-                && builtins.elem name [
-                  "node_modules"
-                  "dist"
-                ]
-              );
-          };
         in
-        {
-          kde-settings = pkgs.buildNpmPackage {
-            name = "kde-settings";
-            src = kdeSettingsSrc;
-
-            inherit (pkgs.importNpmLock) npmConfigHook;
-            npmDeps = pkgs.importNpmLock { npmRoot = kdeSettingsSrc; };
-
-            installPhase = ''
-              runHook preInstall
-
-              mkdir -p "$out"
-              cp -r /build/.local/share/vicinae/extensions/kde-settings/* "$out/"
-
-              runHook postInstall
-            '';
-          };
-
+        builtins.listToAttrs (
+          map (name: {
+            inherit name;
+            value = mkVicinaeExtension pkgs name;
+          }) extensionNames
+        )
+        // {
           default = self.packages.${system}.kde-settings;
         }
       );
 
-      checks = forAllSystems (system: {
-        kde-settings = self.packages.${system}.kde-settings;
-      });
+      checks = forAllSystems (
+        system:
+        builtins.listToAttrs (
+          map (name: {
+            inherit name;
+            value = self.packages.${system}.${name};
+          }) extensionNames
+        )
+      );
     };
 }
